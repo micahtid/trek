@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can sign up and sign in with Google OAuth
-- [ ] **AUTH-02**: User session persists across app restarts (Convex auth token refresh)
-- [ ] **AUTH-03**: User can optionally grant Google Calendar read permission (incremental scope)
-- [ ] **AUTH-04**: User can optionally connect a GitHub account for commit tracking
+- [x] **AUTH-01**: User can sign up and sign in with Google OAuth
+- [x] **AUTH-02**: User session persists across app restarts (Convex auth token refresh)
+- [x] **AUTH-03**: User can optionally grant Google Calendar read permission (incremental scope)
+- [x] **AUTH-04**: User can optionally connect a GitHub account for commit tracking
 
 ### Daily Canvas
 
@@ -97,10 +97,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| AUTH-04 | Phase 1 | Complete |
 | CANV-01 | Phase 2 | Pending |
 | CANV-02 | Phase 2 | Pending |
 | CANV-03 | Phase 2 | Pending |

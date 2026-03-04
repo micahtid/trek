@@ -1,0 +1,15 @@
+{
+  "name": "intern-growth-vault",
+  "version": "1.0.0",
+  "description": "Convex backend for the Intern Growth Vault app",
+  "scripts": {
+    "dev": "convex dev",
+    "deploy": "convex deploy"
+  },
+  "dependencies": {
+    "convex": "^1.32.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

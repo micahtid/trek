@@ -1,4 +1,4 @@
-package com.example.intern_tracker
+package com.internvault.app
 
 import io.flutter.embedding.android.FlutterActivity
 

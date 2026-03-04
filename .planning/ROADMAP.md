@@ -32,7 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can sign out and is redirected to the login screen with all user-scoped data inaccessible
   4. User can grant Google Calendar read permission as a separate optional step after initial sign-in
   5. User can optionally connect a GitHub account from settings without disrupting their Google session
-**Plans**: TBD
+**Plans:** 3/4 plans executed
+Plans:
+- [x] 01-01-PLAN.md — Convex backend setup with custom OIDC auth config and users schema
+- [x] 01-02-PLAN.md — Flutter app shell with Material 3 theme (Sora + amber), bottom nav, and feature-based architecture
+- [ ] 01-03-PLAN.md — Google sign-in flow with Convex OIDC bridge, Riverpod auth state, and router auth guard
+- [ ] 01-04-PLAN.md — Settings screen with profile, sign-out, Calendar scope grant, and GitHub OAuth connection
 
 ### Phase 2: Daily Canvas
 **Goal**: Users have a frictionless daily workspace where they can capture reflections in any format and find them again
@@ -106,7 +111,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Auth | 0/TBD | Not started | - |
+| 1. Foundation and Auth | 3/4 | In Progress|  |
 | 2. Daily Canvas | 0/TBD | Not started | - |
 | 3. Calendar Integration and Push Notifications | 0/TBD | Not started | - |
 | 4. AI Follow-Up Questioning | 0/TBD | Not started | - |
