@@ -12,8 +12,8 @@ Eight weeks of hard dependency-driven work: auth unlocks data, daily canvas prov
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation and Auth** - Working Flutter app with Google OAuth and Convex backend connected
-- [ ] **Phase 2: Daily Canvas** - Full-stack entry creation with voice input, search, and skill tagging
+- [x] **Phase 1: Foundation and Auth** - Working Flutter app with Google OAuth and Convex backend connected
+- [x] **Phase 2: Daily Canvas** - Full-stack entry creation with voice input, search, and skill tagging
 - [ ] **Phase 3: Calendar Integration and Push Notifications** - Meeting skeleton auto-populated and event-triggered nudges firing
 - [ ] **Phase 4: AI Follow-Up Questioning** - Gemini drilling entries for specificity after every event
 - [ ] **Phase 5: GitHub Integration** - Commit and PR data auto-imported alongside Calendar events
@@ -32,12 +32,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can sign out and is redirected to the login screen with all user-scoped data inaccessible
   4. User can grant Google Calendar read permission as a separate optional step after initial sign-in
   5. User can optionally connect a GitHub account from settings without disrupting their Google session
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 Plans:
 - [x] 01-01-PLAN.md — Convex backend setup with custom OIDC auth config and users schema
 - [x] 01-02-PLAN.md — Flutter app shell with Material 3 theme (Sora + amber), bottom nav, and feature-based architecture
-- [ ] 01-03-PLAN.md — Google sign-in flow with Convex OIDC bridge, Riverpod auth state, and router auth guard
-- [ ] 01-04-PLAN.md — Settings screen with profile, sign-out, Calendar scope grant, and GitHub OAuth connection
+- [x] 01-03-PLAN.md — Google sign-in flow with Convex OIDC bridge, Riverpod auth state, and router auth guard
+- [x] 01-04-PLAN.md — Settings screen with profile, sign-out, Calendar scope grant, and GitHub OAuth connection
 
 ### Phase 2: Daily Canvas
 **Goal**: Users have a frictionless daily workspace where they can capture reflections in any format and find them again
@@ -49,7 +49,11 @@ Plans:
   3. User can speak into the app and see their words transcribed and saved as a text entry
   4. User can search across all entries and see matching results with the correct date/time stamp
   5. Every entry displays the date and time it was created without any user input
-**Plans**: TBD
+**Plans:** 3/3 plans executed
+Plans:
+- [x] 02-01-PLAN.md — Convex entries backend (schema, CRUD, search index) and Flutter data layer (Entry model, repository, Riverpod providers)
+- [x] 02-02-PLAN.md — Daily canvas UI with card feed, compose bottom sheet (text + voice), entry detail with edit/delete
+- [x] 02-03-PLAN.md — Full-screen search with full-text search, date filtering, and end-to-end verification
 
 ### Phase 3: Calendar Integration and Push Notifications
 **Goal**: Users see their meetings auto-populated on the canvas and receive reflection prompts after events end
@@ -111,8 +115,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and Auth | 3/4 | In Progress|  |
-| 2. Daily Canvas | 0/TBD | Not started | - |
+| 1. Foundation and Auth | 4/4 | Complete |  |
+| 2. Daily Canvas | 3/3 | Complete | 2026-03-03 |
 | 3. Calendar Integration and Push Notifications | 0/TBD | Not started | - |
 | 4. AI Follow-Up Questioning | 0/TBD | Not started | - |
 | 5. GitHub Integration | 0/TBD | Not started | - |

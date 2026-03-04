@@ -3,12 +3,25 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T06:18:45.845Z"
+last_updated: "2026-03-03T22:16:50.567Z"
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 2
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 7
+---
+
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: in-progress
+last_updated: "2026-03-03T22:10:00Z"
+progress:
+  total_phases: 7
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
@@ -18,33 +31,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-27)
 
 **Core value:** Every intern reflection becomes a future resume bullet point — the app actively interviews interns about their work until entries are specific and impactful enough to prove their value.
-**Current focus:** Phase 1 — Foundation and Auth
+**Current focus:** Phase 2 complete -- ready for Phase 3 (Calendar Integration and Push Notifications)
 
 ## Current Position
 
-Phase: 1 of 7 (Foundation and Auth)
-Plan: 4 of 4 in current phase
-Status: Phase 1 complete — ready for Phase 2
-Last activity: 2026-03-03 — Completed 01-04: Settings screen with Calendar scope grant and GitHub OAuth connection
+Phase: 2 of 7 (Daily Canvas) -- COMPLETE
+Plan: 3 of 3 in current phase (all done)
+Status: Phase 02 complete -- Daily Canvas fully delivered with search, compose, voice, edit/delete
+Last activity: 2026-03-03 -- Completed 02-03: Full-screen search with date filtering (Phase 2 final plan)
 
-Progress: [████░░░░░░] 14%
+Progress: [███████░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 20 min
-- Total execution time: 86 min
+- Total plans completed: 7
+- Average duration: 14 min
+- Total execution time: 101 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-foundation-and-auth | 4 | 86 min | 22 min |
+| 02-daily-canvas | 3 | 15 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 9 min, ~45 min, ~25 min
-- Trend: Auth plans were higher complexity (expected); Phase 1 complete
+- Last 5 plans: ~45 min, ~25 min, 6 min, 4 min, 5 min
+- Trend: UI plans executing quickly when data layer is pre-built
 
 *Updated after each plan completion*
 
@@ -75,6 +89,18 @@ Recent decisions affecting current work:
 - [01-04]: Calendar scope stored in local Riverpod state only — actual Calendar API calls happen in Phase 3
 - [01-04]: Android intent-filter registered for com.internvault.app://oauth2redirect to handle OAuth callback via flutter_web_auth_2
 - [01-04]: Settings-only integrations — Calendar and GitHub connections live in Settings only, never in onboarding
+- [02-01]: userId is v.string() not v.id("users") in entries table — matches auth pattern where userId can be Convex doc ID or Google ID fallback
+- [02-01]: No explicit timestamp on entries — Convex _creationTime (auto-set Unix ms) is sufficient for time queries
+- [02-01]: ConvexClient.subscribe() used for real-time updates — returns SubscriptionHandle with cancel(); preferred over polling
+- [02-01]: speech_to_text and intl installed early to avoid pubspec conflicts in Plan 02
+- [02-02]: EntryCard uses surfaceContainerLow fill (not elevated shadow) for clean M3 aesthetic
+- [02-02]: ComposeSheet inputMethod starts as "text", switches to "voice" on mic use, never reverts
+- [02-02]: Delete uses immediate-delete + undo-snackbar re-create pattern (new _id acceptable for few-second window)
+- [02-02]: ScaffoldMessenger captured before Navigator.pop for cross-screen snackbar display
+- [02-02]: Entry detail uses Navigator.push (not GoRouter) for transient view navigation
+- [02-03]: Custom full-screen search page instead of SearchAnchor -- full control over date filtering and grouped results
+- [02-03]: Timer-based debounce (300ms) for search queries -- avoids hammering Convex search index on every keystroke
+- [02-03]: Search results grouped by date with section headers using intl DateFormat
 
 ### Pending Todos
 
@@ -90,5 +116,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 01-04-PLAN.md — Settings screen with Calendar scope grant and GitHub OAuth connection (Phase 1 complete)
+Stopped at: Completed 02-03-PLAN.md -- Full-screen search with date filtering (Phase 2 complete, all 3 plans done)
 Resume file: None

@@ -16,13 +16,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Daily Canvas
 
-- [ ] **CANV-01**: User opens to a frictionless input surface for capturing daily reflections
-- [ ] **CANV-02**: User can create, read, update, and delete text entries
-- [ ] **CANV-03**: User can input via voice, which is transcribed and converted to text
+- [x] **CANV-01**: User opens to a frictionless input surface for capturing daily reflections
+- [x] **CANV-02**: User can create, read, update, and delete text entries
+- [x] **CANV-03**: User can input via voice, which is transcribed and converted to text
 - [ ] **CANV-04**: User can attach photos, which are processed and described as text
-- [ ] **CANV-05**: All input modes (text, voice, photo) converge into clean, formatted text entries
-- [ ] **CANV-06**: User can search across all entries via full-text search
-- [ ] **CANV-07**: Each entry is auto-stamped with date and time metadata
+- [x] **CANV-05**: All input modes (text, voice, photo) converge into clean, formatted text entries
+- [x] **CANV-06**: User can search across all entries via full-text search
+- [x] **CANV-07**: Each entry is auto-stamped with date and time metadata
 
 ### Integrations
 
@@ -101,13 +101,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-02 | Phase 1 | Complete |
 | AUTH-03 | Phase 1 | Complete |
 | AUTH-04 | Phase 1 | Complete |
-| CANV-01 | Phase 2 | Pending |
-| CANV-02 | Phase 2 | Pending |
-| CANV-03 | Phase 2 | Pending |
+| CANV-01 | Phase 2 | Complete |
+| CANV-02 | Phase 2 | Complete |
+| CANV-03 | Phase 2 | Complete |
 | CANV-04 | Phase 7 | Pending |
-| CANV-05 | Phase 2 | Pending |
-| CANV-06 | Phase 2 | Pending |
-| CANV-07 | Phase 2 | Pending |
+| CANV-05 | Phase 2 | Complete |
+| CANV-06 | Phase 2 | Complete |
+| CANV-07 | Phase 2 | Complete |
 | INTG-01 | Phase 3 | Pending |
 | INTG-02 | Phase 3 | Pending |
 | INTG-03 | Phase 5 | Pending |
