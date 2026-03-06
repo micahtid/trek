@@ -357,11 +357,57 @@ class _GitHubIcon extends StatelessWidget {
         color: const Color(0xFF24292F),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Icon(
-        Icons.code_outlined,
-        color: Colors.white,
-        size: 20,
+      child: Center(
+        child: SizedBox(
+          width: 22,
+          height: 22,
+          child: CustomPaint(painter: _GitHubMarkPainter()),
+        ),
       ),
     );
   }
+}
+
+/// Simplified GitHub Octocat mark (invertocat silhouette).
+class _GitHubMarkPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
+
+    final s = size.width / 24;
+    final path = Path()
+      ..moveTo(12 * s, 0.5 * s)
+      ..cubicTo(5.37 * s, 0.5 * s, 0 * s, 5.87 * s, 0 * s, 12.5 * s)
+      ..cubicTo(0 * s, 17.82 * s, 3.44 * s, 22.31 * s, 8.21 * s, 23.89 * s)
+      ..cubicTo(8.81 * s, 24 * s, 9.02 * s, 23.63 * s, 9.02 * s, 23.32 * s)
+      ..cubicTo(9.02 * s, 23.04 * s, 9.01 * s, 22.07 * s, 9.01 * s, 21.07 * s)
+      ..cubicTo(5.67 * s, 21.81 * s, 4.97 * s, 19.65 * s, 4.97 * s, 19.65 * s)
+      ..cubicTo(4.42 * s, 18.27 * s, 3.63 * s, 17.9 * s, 3.63 * s, 17.9 * s)
+      ..cubicTo(2.55 * s, 17.16 * s, 3.71 * s, 17.18 * s, 3.71 * s, 17.18 * s)
+      ..cubicTo(4.9 * s, 17.26 * s, 5.53 * s, 18.4 * s, 5.53 * s, 18.4 * s)
+      ..cubicTo(6.6 * s, 20.22 * s, 8.36 * s, 19.68 * s, 9.06 * s, 19.38 * s)
+      ..cubicTo(9.16 * s, 18.61 * s, 9.47 * s, 18.07 * s, 9.81 * s, 17.82 * s)
+      ..cubicTo(7.15 * s, 17.57 * s, 4.34 * s, 16.55 * s, 4.34 * s, 11.84 * s)
+      ..cubicTo(4.34 * s, 10.54 * s, 4.81 * s, 9.48 * s, 5.55 * s, 8.64 * s)
+      ..cubicTo(5.43 * s, 8.39 * s, 5.02 * s, 7.18 * s, 5.66 * s, 5.53 * s)
+      ..cubicTo(5.66 * s, 5.53 * s, 6.67 * s, 5.26 * s, 9 * s, 6.81 * s)
+      ..cubicTo(9.94 * s, 6.59 * s, 10.97 * s, 6.48 * s, 12 * s, 6.48 * s)
+      ..cubicTo(13.03 * s, 6.48 * s, 14.06 * s, 6.59 * s, 15 * s, 6.81 * s)
+      ..cubicTo(17.33 * s, 5.26 * s, 18.34 * s, 5.53 * s, 18.34 * s, 5.53 * s)
+      ..cubicTo(18.98 * s, 7.18 * s, 18.57 * s, 8.39 * s, 18.45 * s, 8.64 * s)
+      ..cubicTo(19.19 * s, 9.48 * s, 19.66 * s, 10.54 * s, 19.66 * s, 11.84 * s)
+      ..cubicTo(19.66 * s, 16.56 * s, 16.84 * s, 17.57 * s, 14.17 * s, 17.81 * s)
+      ..cubicTo(14.59 * s, 18.17 * s, 14.97 * s, 18.87 * s, 14.97 * s, 19.95 * s)
+      ..cubicTo(14.97 * s, 21.52 * s, 14.95 * s, 22.78 * s, 14.95 * s, 23.32 * s)
+      ..cubicTo(14.95 * s, 23.63 * s, 15.17 * s, 24.01 * s, 15.78 * s, 23.89 * s)
+      ..cubicTo(20.56 * s, 22.31 * s, 24 * s, 17.82 * s, 24 * s, 12.5 * s)
+      ..cubicTo(24 * s, 5.87 * s, 18.63 * s, 0.5 * s, 12 * s, 0.5 * s)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

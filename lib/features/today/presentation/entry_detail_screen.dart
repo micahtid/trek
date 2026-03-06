@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../data/entry_repository.dart';
 import '../domain/entry.dart';
+import 'entry_providers.dart';
 
 /// Full-view screen for a single Daily Canvas entry.
 ///
@@ -64,6 +65,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
             entryId: widget.entry.id,
             body: text,
           );
+      ref.invalidate(todayEntriesProvider);
       if (mounted) {
         Navigator.pop(context);
       }
@@ -97,6 +99,7 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
     try {
       // Delete immediately
       await repo.deleteEntry(entry.id);
+      ref.invalidate(todayEntriesProvider);
 
       if (mounted) {
         // Pop back to the feed
@@ -109,13 +112,14 @@ class _EntryDetailScreenState extends ConsumerState<EntryDetailScreen> {
             duration: const Duration(seconds: 4),
             action: SnackBarAction(
               label: 'Undo',
-              onPressed: () {
+              onPressed: () async {
                 // Re-create the entry with the same content
-                repo.createEntry(
+                await repo.createEntry(
                   userId: entry.userId,
                   body: entry.body,
                   inputMethod: entry.inputMethod,
                 );
+                ref.invalidate(todayEntriesProvider);
               },
             ),
           ),

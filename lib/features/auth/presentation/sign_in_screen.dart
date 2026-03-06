@@ -83,7 +83,7 @@ class SignInScreen extends ConsumerWidget {
         const SizedBox(height: 20),
         // App name
         Text(
-          'Intern Growth Vault',
+          'Intern Vault',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
@@ -165,67 +165,82 @@ class SignInScreen extends ConsumerWidget {
   }
 }
 
-/// Custom Google "G" logo using colored arcs — no asset dependency.
+/// Google "G" logo rendered as a proper SVG-like path.
 class _GoogleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(22, 22),
-      painter: _GoogleLogoPainter(),
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: CustomPaint(painter: _GoogleLogoPainter()),
     );
   }
 }
 
-/// Paints a simplified Google "G" logo using Material colors.
 class _GoogleLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2;
+    final s = size.width / 48; // scale factor (paths designed for 48x48)
 
-    // Blue arc
-    _drawArc(canvas, center, radius, -0.3, 1.6, const Color(0xFF4285F4));
-    // Red arc
-    _drawArc(canvas, center, radius, 1.3, 1.6, const Color(0xFFEA4335));
-    // Yellow arc
-    _drawArc(canvas, center, radius, 2.9, 1.0, const Color(0xFFFBBC05));
-    // Green arc
-    _drawArc(canvas, center, radius, 3.9, 0.9, const Color(0xFF34A853));
-
-    // White circle in center (creates the "G" cut-out effect)
-    final innerPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius * 0.55, innerPaint);
-
-    // "G" horizontal bar
-    final barPaint = Paint()
-      ..color = const Color(0xFF4285F4)
-      ..strokeWidth = size.height * 0.18
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
-    canvas.drawLine(
-      Offset(center.dx, center.dy),
-      Offset(center.dx + radius * 0.85, center.dy),
-      barPaint,
-    );
-  }
-
-  void _drawArc(Canvas canvas, Offset center, double radius, double start,
-      double sweep, Color color) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    final path = Path()
-      ..moveTo(center.dx, center.dy)
-      ..arcTo(
-        Rect.fromCircle(center: center, radius: radius),
-        start,
-        sweep,
-        false,
-      )
+    // Blue (right side + horizontal bar)
+    final blue = Paint()..color = const Color(0xFF4285F4);
+    final bluePath = Path()
+      ..moveTo(43.611 * s, 20.083 * s)
+      ..lineTo(43.611 * s, 23.917 * s)
+      ..lineTo(25 * s, 23.917 * s)
+      ..lineTo(25 * s, 20.083 * s)
+      ..close()
+      ..moveTo(43.611 * s, 20.083 * s)
+      ..cubicTo(43.611 * s, 18.812 * s, 43.5 * s, 17.583 * s, 43.298 * s, 16.417 * s)
+      ..lineTo(25 * s, 16.417 * s)
+      ..lineTo(25 * s, 23.917 * s)
+      ..lineTo(35.517 * s, 23.917 * s)
+      ..cubicTo(34.933 * s, 26.833 * s, 33.244 * s, 29.317 * s, 30.789 * s, 31.017 * s)
+      ..lineTo(30.789 * s, 31.017 * s)
+      ..lineTo(36.294 * s, 35.317 * s)
+      ..cubicTo(40.094 * s, 31.817 * s, 43.611 * s, 26.417 * s, 43.611 * s, 20.083 * s)
       ..close();
-    canvas.drawPath(path, paint);
+    canvas.drawPath(bluePath, blue);
+
+    // Green (bottom-right)
+    final green = Paint()..color = const Color(0xFF34A853);
+    final greenPath = Path()
+      ..moveTo(25 * s, 38.583 * s)
+      ..cubicTo(20.178 * s, 38.583 * s, 16.006 * s, 36.117 * s, 13.289 * s, 32.417 * s)
+      ..lineTo(7.783 * s, 36.717 * s)
+      ..cubicTo(11.733 * s, 42.817 * s, 17.883 * s, 46.917 * s, 25 * s, 46.917 * s)
+      ..cubicTo(30.6 * s, 46.917 * s, 35.5 * s, 45.017 * s, 39.294 * s, 41.317 * s)
+      ..lineTo(33.789 * s, 37.017 * s)
+      ..cubicTo(31.583 * s, 38.083 * s, 28.917 * s, 38.583 * s, 25 * s, 38.583 * s)
+      ..close();
+    // Simplified — just use a sector approach
+    canvas.drawPath(greenPath, green);
+
+    // Yellow (bottom-left)
+    final yellow = Paint()..color = const Color(0xFFFBBC05);
+    final yellowPath = Path()
+      ..moveTo(10.417 * s, 24 * s)
+      ..cubicTo(10.417 * s, 22.483 * s, 10.717 * s, 21.017 * s, 11.217 * s, 19.667 * s)
+      ..lineTo(5.711 * s, 15.367 * s)
+      ..cubicTo(4.306 * s, 18.017 * s, 3.5 * s, 20.917 * s, 3.5 * s, 24 * s)
+      ..cubicTo(3.5 * s, 27.083 * s, 4.306 * s, 29.983 * s, 5.711 * s, 32.633 * s)
+      ..lineTo(11.217 * s, 28.333 * s)
+      ..cubicTo(10.717 * s, 26.983 * s, 10.417 * s, 25.517 * s, 10.417 * s, 24 * s)
+      ..close();
+    canvas.drawPath(yellowPath, yellow);
+
+    // Red (top-left)
+    final red = Paint()..color = const Color(0xFFEA4335);
+    final redPath = Path()
+      ..moveTo(25 * s, 9.417 * s)
+      ..cubicTo(28.239 * s, 9.417 * s, 31.117 * s, 10.517 * s, 33.389 * s, 12.583 * s)
+      ..lineTo(38.889 * s, 7.083 * s)
+      ..cubicTo(35.167 * s, 3.633 * s, 30.333 * s, 1.083 * s, 25 * s, 1.083 * s)
+      ..cubicTo(17.883 * s, 1.083 * s, 11.733 * s, 5.183 * s, 7.783 * s, 11.283 * s)
+      ..lineTo(13.289 * s, 15.583 * s)
+      ..cubicTo(16.006 * s, 11.883 * s, 20.178 * s, 9.417 * s, 25 * s, 9.417 * s)
+      ..close();
+    canvas.drawPath(redPath, red);
   }
 
   @override

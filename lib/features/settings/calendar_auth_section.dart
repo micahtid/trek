@@ -60,9 +60,9 @@ class CalendarAuthSection extends ConsumerWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(
-            Icons.calendar_today_outlined,
+            Icons.event_rounded,
             color: Color(0xFF4285F4),
-            size: 20,
+            size: 22,
           ),
         ),
         title: const Text(
@@ -77,7 +77,21 @@ class CalendarAuthSection extends ConsumerWidget {
           ),
         ),
         trailing: isConnected
-            ? Icon(Icons.check_circle, color: Colors.green.shade600, size: 20)
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: () => _disconnectCalendar(context, ref),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red.shade400,
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                    child: const Text('Disconnect'),
+                  ),
+                ],
+              )
             : TextButton(
                 onPressed: () => _connectCalendar(context, ref),
                 style: TextButton.styleFrom(
@@ -88,6 +102,41 @@ class CalendarAuthSection extends ConsumerWidget {
               ),
       ),
     );
+  }
+
+  Future<void> _disconnectCalendar(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Disconnect Google Calendar?'),
+        content: const Text(
+          'This removes the Calendar connection from this device. '
+          'You can reconnect any time from Settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red.shade400,
+            ),
+            child: const Text('Disconnect'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      ref.read(calendarConnectedProvider.notifier).setConnected(false);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Calendar disconnected')),
+        );
+      }
+    }
   }
 
   Future<void> _connectCalendar(BuildContext context, WidgetRef ref) async {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -33,11 +34,16 @@ class CalendarAuthExpiredException extends CalendarApiException {
 ///
 /// Uses Bearer token authentication. All methods filter out all-day events
 /// since they rarely warrant reflections.
+///
+/// Calendar IDs are cached for the session to avoid redundant API calls.
 class CalendarRepository {
-  static const _baseUrl =
-      'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+  /// Cached calendar IDs — cleared on sign-out or explicit cache clear.
+  List<String>? _cachedCalendarIds;
 
-  /// Fetches today's timed events from the user's primary Google Calendar.
+  /// Clears the cached calendar IDs (e.g., on sign-out).
+  void clearCache() => _cachedCalendarIds = null;
+
+  /// Fetches today's timed events from all of the user's Google Calendars.
   ///
   /// Returns events sorted by start time (ascending). All-day events are
   /// excluded since they rarely need reflection.
@@ -49,11 +55,56 @@ class CalendarRepository {
     final startOfDay = DateTime(now.year, now.month, now.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    return _fetchEvents(
+    final timeMin = startOfDay.toUtc().toIso8601String();
+    final timeMax = endOfDay.toUtc().toIso8601String();
+
+    // Fetch all calendars the user has access to
+    final calendarIds = await _fetchCalendarIds(accessToken);
+
+    // Fetch events from all calendars in parallel
+    final futures = calendarIds.map((calendarId) => _fetchEvents(
       accessToken: accessToken,
-      timeMin: startOfDay.toUtc().toIso8601String(),
-      timeMax: endOfDay.toUtc().toIso8601String(),
+      timeMin: timeMin,
+      timeMax: timeMax,
+      calendarId: calendarId,
+    ));
+    final results = await Future.wait(futures);
+
+    // Merge and sort by start time
+    final allEvents = results.expand((e) => e).toList()
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
+    return allEvents;
+  }
+
+  /// Fetches the list of calendar IDs the user has access to.
+  /// Results are cached for the session.
+  Future<List<String>> _fetchCalendarIds(String accessToken) async {
+    if (_cachedCalendarIds != null) return _cachedCalendarIds!;
+
+    final uri = Uri.parse(
+      'https://www.googleapis.com/calendar/v3/users/me/calendarList'
+    ).replace(queryParameters: {
+      'fields': 'items(id,summary,primary)',
+    });
+
+    final response = await http.get(
+      uri,
+      headers: {'Authorization': 'Bearer $accessToken'},
     );
+
+    if (response.statusCode != 200) {
+      debugPrint('[Calendar] calendarList error: ${response.statusCode}');
+      return ['primary'];
+    }
+
+    final data = json.decode(response.body) as Map<String, dynamic>;
+    final items = (data['items'] as List<dynamic>?) ?? [];
+
+    _cachedCalendarIds = items
+        .cast<Map<String, dynamic>>()
+        .map((item) => item['id'] as String)
+        .toList();
+    return _cachedCalendarIds!;
   }
 
   /// Fetches timed events since [since] up to now.
@@ -64,11 +115,20 @@ class CalendarRepository {
     String accessToken,
     DateTime since,
   ) async {
-    return _fetchEvents(
+    final timeMin = since.toUtc().toIso8601String();
+    final timeMax = DateTime.now().toUtc().toIso8601String();
+
+    final calendarIds = await _fetchCalendarIds(accessToken);
+    final futures = calendarIds.map((calendarId) => _fetchEvents(
       accessToken: accessToken,
-      timeMin: since.toUtc().toIso8601String(),
-      timeMax: DateTime.now().toUtc().toIso8601String(),
-    );
+      timeMin: timeMin,
+      timeMax: timeMax,
+      calendarId: calendarId,
+    ));
+    final results = await Future.wait(futures);
+
+    return results.expand((e) => e).toList()
+      ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
   /// Internal: fetches events from Google Calendar API with the given time range.
@@ -76,8 +136,10 @@ class CalendarRepository {
     required String accessToken,
     required String timeMin,
     required String timeMax,
+    String calendarId = 'primary',
   }) async {
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: {
+    final baseUrl = 'https://www.googleapis.com/calendar/v3/calendars/${Uri.encodeComponent(calendarId)}/events';
+    final uri = Uri.parse(baseUrl).replace(queryParameters: {
       'timeMin': timeMin,
       'timeMax': timeMax,
       'singleEvents': 'true',
@@ -103,11 +165,11 @@ class CalendarRepository {
     final data = json.decode(response.body) as Map<String, dynamic>;
     final items = (data['items'] as List<dynamic>?) ?? [];
 
-    return items
+    final allEvents = items
         .cast<Map<String, dynamic>>()
         .map(CalendarEvent.fromGoogleJson)
-        .where((e) => !e.isAllDay) // Filter out all-day events
         .toList();
+    return allEvents.where((e) => !e.isAllDay).toList();
   }
 }
 

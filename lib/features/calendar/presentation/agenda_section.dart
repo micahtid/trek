@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../shell/app_shell.dart';
 import '../../today/domain/entry.dart';
 import '../../today/presentation/compose_sheet.dart';
 import '../../today/presentation/entry_detail_screen.dart';
@@ -31,10 +32,14 @@ class AgendaSection extends ConsumerStatefulWidget {
 class _AgendaSectionState extends ConsumerState<AgendaSection> {
   bool _isExpanded = true;
 
+  /// Tracks event IDs that have been dismissed/skipped locally but haven't
+  /// yet been reflected in the provider data. Prevents the "dismissed
+  /// Dismissible still in tree" error.
+  final Set<String> _dismissedEventIds = {};
+
   @override
   void initState() {
     super.initState();
-    // If there's a highlight event, ensure expanded
     if (widget.highlightEventId != null) {
       _isExpanded = true;
     }
@@ -42,6 +47,7 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
 
   /// Opens the ComposeSheet pre-linked to a calendar event.
   void _openComposeForEvent(CalendarEvent event) {
+    ref.read(fabVisibleProvider.notifier).hide();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -53,22 +59,57 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
         calendarEventId: event.id,
         eventTitle: event.title,
       ),
-    );
+    ).whenComplete(() {
+      ref.read(fabVisibleProvider.notifier).show();
+    });
   }
 
-  /// Skips a calendar event (marks as "skipped" in Convex).
+  /// Skips a calendar event with undo support.
+  ///
+  /// Immediately removes the event from the visible list, then fires the
+  /// API call. Shows a SnackBar with an Undo action that reverts the skip.
   Future<void> _skipEvent(CalendarEvent event) async {
-    await ref.read(calendarEventRepositoryProvider).updateEventStatus(
-          eventId: event.id,
-          status: 'skipped',
-        );
+    // Remove from visible list immediately (fixes Dismissible tree error)
+    setState(() => _dismissedEventIds.add(event.id));
+
+    final eventRepo = ref.read(calendarEventRepositoryProvider);
+
+    // Show undo snackbar
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Skipped "${event.title}"'),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () async {
+              // Re-show the event in the list
+              setState(() => _dismissedEventIds.remove(event.id));
+              // Revert status to ended
+              await eventRepo.updateEventStatus(
+                eventId: event.id,
+                status: 'ended',
+              );
+              ref.invalidate(todayCalendarEventsProvider);
+              ref.invalidate(unreflectedEventsProvider);
+            },
+          ),
+        ),
+      );
+    }
+
+    // Fire the actual skip API call
+    await eventRepo.updateEventStatus(
+      eventId: event.id,
+      status: 'skipped',
+    );
     ref.invalidate(todayCalendarEventsProvider);
     ref.invalidate(unreflectedEventsProvider);
   }
 
   /// Navigates to the linked entry detail for a reflected event.
   void _openLinkedEntry(CalendarEvent event, List<Entry> todayEntries) {
-    // Find the entry linked to this event
     final linkedEntry = todayEntries
         .where((e) => e.calendarEventId == event.id)
         .firstOrNull;
@@ -129,8 +170,16 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
           return eventDate.isBefore(startOfToday);
         }).toList();
 
+        // Filter out locally dismissed events
+        final visibleTodayEvents = todayEvents
+            .where((e) => !_dismissedEventIds.contains(e.id))
+            .toList();
+        final visibleMissedEvents = missedEvents
+            .where((e) => !_dismissedEventIds.contains(e.id))
+            .toList();
+
         // If no events at all, render nothing
-        if (todayEvents.isEmpty && missedEvents.isEmpty) {
+        if (visibleTodayEvents.isEmpty && visibleMissedEvents.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -138,7 +187,7 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header row
-            _buildHeader(theme, colorScheme, todayEvents.length),
+            _buildHeader(theme, colorScheme, visibleTodayEvents.length),
 
             // Expandable content
             AnimatedSize(
@@ -150,9 +199,9 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Today's events
-                        if (todayEvents.isNotEmpty) ...[
+                        if (visibleTodayEvents.isNotEmpty) ...[
                           ..._buildTodayEvents(
-                            todayEvents,
+                            visibleTodayEvents,
                             todayEntries,
                             theme,
                             colorScheme,
@@ -160,10 +209,10 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
                         ],
 
                         // Missed events from past days
-                        if (missedEvents.isNotEmpty) ...[
+                        if (visibleMissedEvents.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           ..._buildMissedEvents(
-                            missedEvents,
+                            visibleMissedEvents,
                             todayEntries,
                             theme,
                             colorScheme,
@@ -177,7 +226,7 @@ class _AgendaSectionState extends ConsumerState<AgendaSection> {
             ),
 
             // Divider between agenda and entries
-            if (todayEvents.isNotEmpty || missedEvents.isNotEmpty)
+            if (visibleTodayEvents.isNotEmpty || visibleMissedEvents.isNotEmpty)
               const Divider(height: 1),
           ],
         );

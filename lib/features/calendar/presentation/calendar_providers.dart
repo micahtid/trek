@@ -57,6 +57,9 @@ Future<String> getCalendarAccessToken() async {
 /// If Calendar is not connected (scope not granted), returns empty list.
 final todayCalendarEventsProvider =
     FutureProvider.autoDispose<List<CalendarEvent>>((ref) async {
+  // Keep cached across tab switches; only refetch on explicit invalidation
+  ref.keepAlive();
+
   final userId = ref.watch(currentUserIdProvider);
   if (userId == null) return [];
 
@@ -101,14 +104,13 @@ final todayCalendarEventsProvider =
     // Query Convex for today's events (source of truth after upsert)
     final now = DateTime.now();
     final startOfDay = DateTime(now.year, now.month, now.day);
-    return await eventRepo.getTodayEvents(
+    final convexEvents = await eventRepo.getTodayEvents(
       userId: userId,
       startOfDay: startOfDay.millisecondsSinceEpoch,
     );
+    return convexEvents;
   } catch (e) {
-    // If Calendar is not connected (scope not granted), return empty list
-    // rather than propagating the error
-    debugPrint('[todayCalendarEventsProvider] error: $e');
+    debugPrint('[Calendar] error: $e');
     return [];
   }
 });

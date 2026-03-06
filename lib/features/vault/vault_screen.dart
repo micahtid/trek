@@ -5,9 +5,8 @@ class VaultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Vault')),
-      body: const Center(child: Text('Vault — coming in Phase 6')),
+    return const Scaffold(
+      body: Center(child: Text('Vault — coming in Phase 6')),
     );
   }
 }

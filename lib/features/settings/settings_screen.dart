@@ -32,6 +32,7 @@ class SettingsScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
       ),
       body: ListView(
+        padding: const EdgeInsets.only(bottom: 100),
         children: [
           // ----------------------------------------------------------------
           // Profile section
@@ -69,7 +70,6 @@ class SettingsScreen extends ConsumerWidget {
           // ----------------------------------------------------------------
           _buildSectionHeader(context, 'Account'),
           _buildSignOutTile(context, ref),
-          const SizedBox(height: 32),
         ],
       ),
     );

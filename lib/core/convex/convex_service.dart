@@ -1,103 +1,98 @@
-import 'dart:async';
+import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
-import 'package:convex_flutter/convex_flutter.dart';
+import 'package:http/http.dart' as http;
 
 const String kConvexDeploymentUrl = 'https://grand-tortoise-682.convex.cloud';
 
-/// Ensures ConvexClient is initialized exactly once.
-/// Returns true if ready, false if initialization failed.
-Future<bool> ensureConvexInitialized() async {
-  if (_convexInitialized) return true;
-  if (_convexInitFailed) return false;
+/// HTTP-based Convex service that calls the built-in Convex HTTP API.
+///
+/// Replaces the convex_flutter Rust FFI client with simple POST requests
+/// to `/api/query` and `/api/mutation`. No native compilation required.
+class ConvexHttpService {
+  ConvexHttpService._();
 
-  try {
-    await ConvexClient.initialize(
-      const ConvexConfig(
-        deploymentUrl: kConvexDeploymentUrl,
-        clientId: 'intern-growth-vault-flutter',
-      ),
-    ).timeout(const Duration(seconds: 10));
-    _convexInitialized = true;
-    return true;
-  } catch (e) {
-    debugPrint('[ConvexService] initialization failed: $e');
-    _convexInitFailed = true;
-    return false;
+  static final ConvexHttpService instance = ConvexHttpService._();
+
+  String? _token;
+
+  /// Sets the Bearer token sent with every request.
+  void setToken(String? token) {
+    _token = token;
+  }
+
+  /// Clears the stored auth token.
+  void clearToken() {
+    _token = null;
+  }
+
+  /// Calls a Convex query function via HTTP POST.
+  ///
+  /// [path] is the function path, e.g. `"entries:getEntriesToday"`.
+  /// [args] is the map of arguments to pass.
+  ///
+  /// Returns the parsed `value` field from the Convex response.
+  Future<dynamic> query({
+    required String path,
+    Map<String, dynamic> args = const {},
+  }) async {
+    return _call(endpoint: 'query', path: path, args: args);
+  }
+
+  /// Calls a Convex mutation function via HTTP POST.
+  ///
+  /// Returns the parsed `value` field from the Convex response.
+  Future<dynamic> mutation({
+    required String path,
+    Map<String, dynamic> args = const {},
+  }) async {
+    return _call(endpoint: 'mutation', path: path, args: args);
+  }
+
+  Future<dynamic> _call({
+    required String endpoint,
+    required String path,
+    required Map<String, dynamic> args,
+  }) async {
+    final url = Uri.parse('$kConvexDeploymentUrl/api/$endpoint');
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+    if (_token != null) {
+      headers['Authorization'] = 'Bearer $_token';
+    }
+
+    final body = json.encode({
+      'path': path,
+      'args': args,
+      'format': 'json',
+    });
+
+    final response = await http.post(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      if (decoded is Map && decoded['status'] == 'success') {
+        return decoded['value'];
+      }
+      if (decoded is Map && decoded['status'] == 'error') {
+        throw ConvexHttpException(
+          decoded['errorMessage'] as String? ?? 'Unknown Convex error',
+        );
+      }
+      // Unexpected shape — return raw decoded
+      return decoded;
+    }
+
+    throw ConvexHttpException(
+      'HTTP ${response.statusCode}: ${response.body}',
+    );
   }
 }
 
-bool _convexInitialized = false;
-bool _convexInitFailed = false;
+class ConvexHttpException implements Exception {
+  final String message;
+  const ConvexHttpException(this.message);
 
-class ConvexService {
-  ConvexService._();
-
-  static final ConvexService instance = ConvexService._();
-
-  AuthHandleWrapper? _authHandle;
-
-  Future<void> setupAuth({
-    required Future<String?> Function() fetchToken,
-    void Function(bool isAuthenticated)? onAuthChange,
-  }) async {
-    final ready = await ensureConvexInitialized();
-    if (!ready) {
-      debugPrint('[ConvexService] skipping setupAuth — Convex not initialized');
-      return;
-    }
-    _authHandle?.dispose();
-    _authHandle = await ConvexClient.instance.setAuthWithRefresh(
-      fetchToken: fetchToken,
-      onAuthChange: onAuthChange,
-    );
-  }
-
-  Future<void> clearAuth() async {
-    _authHandle?.dispose();
-    _authHandle = null;
-    if (_convexInitialized) {
-      await ConvexClient.instance.clearAuth();
-    }
-  }
-
-  bool get isAuthenticated => _authHandle?.isAuthenticated ?? false;
-
-  Future<String> mutation({
-    required String name,
-    required Map<String, dynamic> args,
-  }) async {
-    final ready = await ensureConvexInitialized();
-    if (!ready) throw StateError('Convex not initialized');
-    return ConvexClient.instance.mutation(name: name, args: args);
-  }
-
-  Future<String> query(String name, Map<String, dynamic> args) async {
-    final ready = await ensureConvexInitialized();
-    if (!ready) throw StateError('Convex not initialized');
-    return ConvexClient.instance.query(name, args);
-  }
-
-  /// Subscribes to a Convex query for real-time updates.
-  ///
-  /// Returns a [SubscriptionHandle] whose [cancel] method should be called
-  /// when the subscription is no longer needed (e.g., in `ref.onDispose`).
-  ///
-  /// [onUpdate] fires with a JSON string whenever the query result changes.
-  /// [onError] fires with an error message and optional value.
-  Future<SubscriptionHandle> subscribe({
-    required String name,
-    required Map<String, dynamic> args,
-    required void Function(String value) onUpdate,
-    required void Function(String message, String? value) onError,
-  }) async {
-    final ready = await ensureConvexInitialized();
-    if (!ready) throw StateError('Convex not initialized');
-    return ConvexClient.instance.subscribe(
-      name: name,
-      args: args,
-      onUpdate: onUpdate,
-      onError: onError,
-    );
-  }
+  @override
+  String toString() => 'ConvexHttpException: $message';
 }
