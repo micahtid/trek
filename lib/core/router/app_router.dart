@@ -81,9 +81,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/today',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TodayScreen(),
-            ),
+            pageBuilder: (context, state) {
+              final eventId = state.uri.queryParameters['eventId'];
+              return NoTransitionPage(
+                child: TodayScreen(highlightEventId: eventId),
+              );
+            },
           ),
           GoRoute(
             path: '/vault',

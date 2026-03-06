@@ -64,7 +64,7 @@ class EntryCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              // Bottom row: timestamp + optional mic badge
+              // Bottom row: timestamp + optional badges (mic, meeting)
               Row(
                 children: [
                   if (entry.isVoice) ...[
@@ -74,6 +74,38 @@ class EntryCard extends StatelessWidget {
                       color: colorScheme.onSurfaceVariant.withAlpha(153),
                     ),
                     const SizedBox(width: 4),
+                  ],
+                  if (entry.isCalendarReflection) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.event_rounded,
+                            size: 12,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Meeting',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onPrimaryContainer,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                   ],
                   Text(
                     _formatTimestamp(entry.createdAt),

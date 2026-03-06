@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../calendar/presentation/agenda_section.dart';
 import 'domain/entry.dart';
-import 'presentation/compose_sheet.dart';
 import 'presentation/entry_card.dart';
 import 'presentation/entry_detail_screen.dart';
 import 'presentation/entry_providers.dart';
@@ -13,20 +13,14 @@ import 'presentation/search_screen.dart';
 /// Watches [todayEntriesProvider] for real-time updates and displays
 /// [EntryCard] widgets in reverse chronological order (newest first).
 /// A FAB opens the [ComposeSheet] for creating new entries.
+///
+/// Shows an [AgendaSection] at the top when Calendar is connected, displaying
+/// today's meetings and missed events from past days.
 class TodayScreen extends ConsumerWidget {
-  const TodayScreen({super.key});
+  /// Optional event ID to highlight (from notification deep-link).
+  final String? highlightEventId;
 
-  void _openComposeSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => const ComposeSheet(),
-    );
-  }
+  const TodayScreen({super.key, this.highlightEventId});
 
   void _openEntryDetail(BuildContext context, Entry entry) {
     Navigator.push(
@@ -58,53 +52,59 @@ class TodayScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: entriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 48,
-                  color: colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Something went wrong',
-                  style: theme.textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  error.toString(),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+      body: Column(
+        children: [
+          // Agenda section at top — shows calendar events when connected
+          AgendaSection(highlightEventId: highlightEventId),
+
+          // Entries feed below
+          Expanded(
+            child: entriesAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Something went wrong',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        error.toString(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.tonal(
+                        onPressed: () => ref.invalidate(todayEntriesProvider),
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
-                FilledButton.tonal(
-                  onPressed: () => ref.invalidate(todayEntriesProvider),
-                  child: const Text('Retry'),
-                ),
-              ],
+              ),
+              data: (entries) {
+                if (entries.isEmpty) {
+                  return _buildEmptyState(theme, colorScheme);
+                }
+                return _buildEntryList(context, entries);
+              },
             ),
           ),
-        ),
-        data: (entries) {
-          if (entries.isEmpty) {
-            return _buildEmptyState(theme, colorScheme);
-          }
-          return _buildEntryList(context, entries);
-        },
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _openComposeSheet(context),
-        tooltip: 'New entry',
-        child: const Icon(Icons.add),
-      ),
+      // FAB lives on AppShell's outer Scaffold so it auto-positions above the nav bar
     );
   }
 

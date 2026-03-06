@@ -1,24 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 
 import 'app.dart';
-import 'core/convex/convex_service.dart';
+import 'core/router/app_router.dart';
+import 'features/notifications/notification_service.dart';
 
-/// Entry point.
-///
-/// Convex must be initialized before any Riverpod providers attempt to use it.
-/// initConvexClient() creates the singleton ConvexClient with the deployment URL.
-/// Auth bridge (setAuthWithRefresh) is set up lazily by AuthNotifier when it builds.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Convex client singleton before the app starts
-  // This must complete before any ConvexClient.instance calls
-  await initConvexClient();
+  // Initialize timezone data for notification scheduling
+  tz.initializeTimeZones();
+
+  // Create a ProviderContainer so notification tap handler can access
+  // providers outside the widget tree.
+  final container = ProviderContainer();
+
+  // Initialize local notifications with tap handler
+  await NotificationService.initialize(
+    onTap: (response) {
+      final calendarEventId = response.payload;
+      if (calendarEventId != null && calendarEventId.isNotEmpty) {
+        container
+            .read(routerProvider)
+            .go('/today?eventId=$calendarEventId');
+      }
+    },
+  );
+
+  // Check if app was launched via notification tap
+  String? initialEventId;
+  final launchDetails = await FlutterLocalNotificationsPlugin()
+      .getNotificationAppLaunchDetails();
+  if (launchDetails?.didNotificationLaunchApp == true) {
+    final payload = launchDetails?.notificationResponse?.payload;
+    if (payload != null && payload.isNotEmpty) {
+      initialEventId = payload;
+    }
+  }
 
   runApp(
-    const ProviderScope(
-      child: App(),
+    UncontrolledProviderScope(
+      container: container,
+      child: App(initialEventId: initialEventId),
     ),
   );
 }

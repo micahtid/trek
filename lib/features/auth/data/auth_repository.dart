@@ -118,7 +118,13 @@ class AuthRepository {
     // If a Future is returned, we await it for fast session restore.
     // If null is returned (e.g. FedCM on web), we rely on the stream.
     if (future != null) {
-      await future;
+      try {
+        await future;
+      } on GoogleSignInException {
+        // No cached credential — expected on fresh install or expired session.
+        // The auth event stream error handler will emit AuthEventError,
+        // and AuthNotifier will set state to unauthenticated.
+      }
     }
   }
 

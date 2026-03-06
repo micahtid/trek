@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
+import '../../calendar/data/calendar_event_repository.dart';
+import '../../calendar/presentation/calendar_providers.dart';
 import '../data/entry_repository.dart';
 import 'entry_providers.dart';
 
@@ -12,7 +14,17 @@ import 'entry_providers.dart';
 /// [EntryRepository.createEntry]. Tracks whether the input originated
 /// from voice so the entry can be tagged with the correct inputMethod.
 class ComposeSheet extends ConsumerStatefulWidget {
-  const ComposeSheet({super.key});
+  /// Optional calendar event ID to link this entry to a calendar event.
+  final String? calendarEventId;
+
+  /// Optional event title shown as context when reflecting on a calendar event.
+  final String? eventTitle;
+
+  const ComposeSheet({
+    super.key,
+    this.calendarEventId,
+    this.eventTitle,
+  });
 
   @override
   ConsumerState<ComposeSheet> createState() => _ComposeSheetState();
@@ -116,11 +128,28 @@ class _ComposeSheetState extends ConsumerState<ComposeSheet> {
     setState(() => _isSaving = true);
 
     try {
-      await ref.read(entryRepositoryProvider).createEntry(
+      final newEntryId = await ref.read(entryRepositoryProvider).createEntry(
             userId: userId,
             body: text,
             inputMethod: _inputMethod,
+            calendarEventId: widget.calendarEventId,
           );
+
+      // If linked to a calendar event, update event status to "reflected"
+      if (widget.calendarEventId != null) {
+        await ref
+            .read(calendarEventRepositoryProvider)
+            .updateEventStatus(
+              eventId: widget.calendarEventId!,
+              status: 'reflected',
+              linkedEntryId: newEntryId,
+            );
+        ref.invalidate(todayCalendarEventsProvider);
+        ref.invalidate(unreflectedEventsProvider);
+      }
+
+      // Refresh today's entries list after creating a new entry
+      ref.invalidate(todayEntriesProvider);
 
       if (mounted) {
         Navigator.pop(context);
@@ -165,6 +194,33 @@ class _ComposeSheetState extends ConsumerState<ComposeSheet> {
             ),
             const SizedBox(height: 16),
 
+            // Event title label (when reflecting on a calendar event)
+            if (widget.eventTitle != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.event_rounded,
+                      size: 18,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        widget.eventTitle!,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
             // Text field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -175,7 +231,9 @@ class _ComposeSheetState extends ConsumerState<ComposeSheet> {
                 minLines: 3,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
-                  hintText: 'What did you work on?',
+                  hintText: widget.eventTitle != null
+                      ? 'How did ${widget.eventTitle} go?'
+                      : 'What did you work on?',
                   hintStyle: TextStyle(
                     color: colorScheme.onSurfaceVariant.withAlpha(128),
                   ),

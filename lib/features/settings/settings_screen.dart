@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/domain/auth_state.dart';
 import '../auth/presentation/auth_provider.dart';
+import '../calendar/presentation/calendar_providers.dart';
+import '../notifications/notification_service.dart';
 import 'calendar_auth_section.dart';
 import 'github_auth_section.dart';
 
@@ -26,6 +29,7 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Settings'),
         elevation: 0,
+        backgroundColor: Colors.transparent,
       ),
       body: ListView(
         children: [
@@ -45,6 +49,16 @@ class SettingsScreen extends ConsumerWidget {
           const CalendarAuthSection(),
           const SizedBox(height: 4),
           const GitHubAuthSection(),
+          const SizedBox(height: 8),
+
+          const Divider(height: 1),
+          const SizedBox(height: 8),
+
+          // ----------------------------------------------------------------
+          // Notifications section
+          // ----------------------------------------------------------------
+          _buildSectionHeader(context, 'Notifications'),
+          _buildReflectionRemindersToggle(context, ref),
           const SizedBox(height: 8),
 
           const Divider(height: 1),
@@ -128,6 +142,34 @@ class SettingsScreen extends ConsumerWidget {
               letterSpacing: 0.8,
             ),
       ),
+    );
+  }
+
+  Widget _buildReflectionRemindersToggle(
+      BuildContext context, WidgetRef ref) {
+    final remindersAsync = ref.watch(reflectionRemindersEnabledProvider);
+    final isEnabled = remindersAsync.asData?.value ?? true;
+
+    return SwitchListTile(
+      secondary: const Icon(Icons.notifications_active_outlined),
+      title: const Text('Reflection reminders'),
+      subtitle: const Text('Get nudged after calendar events end'),
+      value: isEnabled,
+      onChanged: (value) async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('reflectionRemindersEnabled', value);
+
+        if (!value) {
+          // Disable: cancel all pending notifications
+          await NotificationService.cancelAll();
+        } else {
+          // Re-enable: invalidate calendar providers to re-trigger scheduling
+          ref.invalidate(todayCalendarEventsProvider);
+        }
+
+        // Refresh the setting provider
+        ref.invalidate(reflectionRemindersEnabledProvider);
+      },
     );
   }
 

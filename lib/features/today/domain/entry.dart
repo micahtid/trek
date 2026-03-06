@@ -20,12 +20,17 @@ class Entry {
   /// Convex _creationTime — Unix milliseconds since epoch.
   final int creationTime;
 
+  /// Optional Convex _id of the linked calendar event (Phase 3).
+  /// Non-null when this entry was created as a reflection on a calendar event.
+  final String? calendarEventId;
+
   const Entry({
     required this.id,
     required this.userId,
     required this.body,
     required this.inputMethod,
     required this.creationTime,
+    this.calendarEventId,
   });
 
   /// Parses a Convex document JSON map into an [Entry].
@@ -38,6 +43,7 @@ class Entry {
       body: json['body'] as String,
       inputMethod: json['inputMethod'] as String,
       creationTime: (json['_creationTime'] as num).toInt(),
+      calendarEventId: json['calendarEventId'] as String?,
     );
   }
 
@@ -46,6 +52,9 @@ class Entry {
 
   /// Whether this entry was created via voice input.
   bool get isVoice => inputMethod == 'voice';
+
+  /// Whether this entry is a reflection on a calendar event.
+  bool get isCalendarReflection => calendarEventId != null;
 
   @override
   String toString() => 'Entry(id: $id, body: "${body.length > 40 ? '${body.substring(0, 40)}...' : body}")';
