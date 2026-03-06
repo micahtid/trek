@@ -26,10 +26,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Integrations
 
-- [ ] **INTG-01**: User sees Google Calendar meetings auto-populated on their daily canvas
-- [ ] **INTG-02**: User receives push notification after a Calendar event ends asking for reflection
+- [x] **INTG-01**: User sees Google Calendar meetings auto-populated on their daily canvas
+- [x] **INTG-02**: User receives push notification after a Calendar event ends asking for reflection
 - [ ] **INTG-03**: User sees GitHub commits and PR descriptions on their daily canvas
-- [ ] **INTG-04**: App checks for missed Calendar events on open and surfaces reflection prompts (pull-based catch-up)
+- [x] **INTG-04**: App checks for missed Calendar events on open and surfaces reflection prompts (pull-based catch-up)
 
 ### AI Features
 
@@ -108,10 +108,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CANV-05 | Phase 2 | Complete |
 | CANV-06 | Phase 2 | Complete |
 | CANV-07 | Phase 2 | Complete |
-| INTG-01 | Phase 3 | Pending |
-| INTG-02 | Phase 3 | Pending |
+| INTG-01 | Phase 3 | Complete |
+| INTG-02 | Phase 3 | Complete |
 | INTG-03 | Phase 5 | Pending |
-| INTG-04 | Phase 3 | Pending |
+| INTG-04 | Phase 3 | Complete |
 | AI-01 | Phase 4 | Pending |
 | AI-02 | Phase 4 | Pending |
 | AI-03 | Phase 4 | Pending |

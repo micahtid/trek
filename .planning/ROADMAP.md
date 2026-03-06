@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and Auth** - Working Flutter app with Google OAuth and Convex backend connected
 - [x] **Phase 2: Daily Canvas** - Full-stack entry creation with voice input, search, and skill tagging
-- [ ] **Phase 3: Calendar Integration and Push Notifications** - Meeting skeleton auto-populated and event-triggered nudges firing
+- [x] **Phase 3: Calendar Integration and Push Notifications** - Meeting skeleton auto-populated and event-triggered nudges firing
 - [ ] **Phase 4: AI Follow-Up Questioning** - Gemini drilling entries for specificity after every event
 - [ ] **Phase 5: GitHub Integration** - Commit and PR data auto-imported alongside Calendar events
 - [ ] **Phase 6: Weekly Vault Archival** - Weekly AI summaries archived to permanent vault with accomplishment overview
@@ -64,7 +64,10 @@ Plans:
   2. User receives a push notification asking for a reflection within a few minutes after a Calendar event ends
   3. Tapping a push notification deep-links directly to the relevant entry on the daily canvas
   4. User opens the app after being away and sees prompts for any Calendar events that occurred since their last visit (pull-based catch-up)
-**Plans**: TBD
+**Plans:** 2/2 plans executed
+Plans:
+- [x] 03-01-PLAN.md — Convex calendarEvents backend, Flutter CalendarEvent model, Google Calendar API repository, Convex event repository, notification service, and package installation
+- [x] 03-02-PLAN.md — Agenda section UI on daily canvas, event cards, compose sheet extension, notification deep linking, pull-based catch-up, and Settings toggle
 
 ### Phase 4: AI Follow-Up Questioning
 **Goal**: After users create entries, Gemini actively questions them until entries are specific and quantified
@@ -74,7 +77,11 @@ Plans:
   1. After a user creates or speaks an entry, an AI follow-up question appears inline that asks for a specific detail (a percentage, a count, a concrete outcome)
   2. Entries are automatically tagged with skill labels (e.g., #SQL, #PublicSpeaking) and an impact level that the user can see
   3. The AI's follow-up questions steer entries toward the five professional reflection categories (Key Learnings, Mistakes and Lessons, Next Steps, Questions, What I Built Today) without forcing the user into a rigid form
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — Firebase bootstrap, Convex schema extension with AI metadata, Entry model expansion, AiService singleton with Gemini chat and analysis models
+- [ ] 04-02-PLAN.md — Drilldown chat widget, state machine, ComposeSheet post-save integration, merge and analysis pipeline
+- [ ] 04-03-PLAN.md — AI metadata display on entry cards (skill chips, impact dot, category label), detail screen insights section with user override controls
 
 ### Phase 5: GitHub Integration
 **Goal**: Users see their GitHub commits and PR descriptions auto-imported on the daily canvas alongside meetings
@@ -111,14 +118,14 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and Auth | 4/4 | Complete |  |
 | 2. Daily Canvas | 3/3 | Complete | 2026-03-03 |
-| 3. Calendar Integration and Push Notifications | 0/TBD | Not started | - |
-| 4. AI Follow-Up Questioning | 0/TBD | Not started | - |
+| 3. Calendar Integration and Push Notifications | 2/2 | Complete | 2026-03-04 |
+| 4. AI Follow-Up Questioning | 0/3 | Not started | - |
 | 5. GitHub Integration | 0/TBD | Not started | - |
 | 6. Weekly Vault Archival | 0/TBD | Not started | - |
 | 7. Vault Query and Resume Generation | 0/TBD | Not started | - |
